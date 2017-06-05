@@ -231,11 +231,12 @@ exports.randomcheck = function(req, res, next) {
         var result = answer.toLowerCase().trim() === req.quiz.answer.toLowerCase().trim();
         //app.locals.score = app.locals.score || 0;
 	if(result){
+		
 		 req.session.score = req.session.score + 1;
 		var score_aux = req.session.score;
 	} else {
 		delete req.session.preguntas;
-		score_aux = req.session.score;
+		score_aux = 0;
 		req.session.score = 0;
 	}
 	res.render('quizzes/randomresult', {score:score_aux, result: result, answer: answer});
