@@ -226,7 +226,7 @@ exports.randomplay = function (req, res, next) {
 exports.randomcheck = function(req, res, next) {
 	var answer = req.query.answer || "";
         var result = answer.toLowerCase().trim() === req.quiz.answer.toLowerCase().trim();
-        app.locals.score = app.locals.score || 0;
+        //app.locals.score = app.locals.score || 0;
 	if(result){
 		 app.locals.score = app.locals.score + 1;
 		var score_aux = app.locals.score;
