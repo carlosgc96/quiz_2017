@@ -191,7 +191,10 @@ exports.check = function (req, res, next) {
 };
 
 exports.randomplay = function (req, res, next) {
-    app.locals.score = app.locals.score || 0; // Preguntar porque no me deja hacerlo con var = req.query.score, si lo hago asi se me resetea a 0
+    //app.locals.score = app.locals.score || 0; // Preguntar porque no me deja hacerlo con var = req.query.score, si lo hago asi se me resetea a 0
+  if(req.session.score ===undefined){
+	req.session.score = 0;
+}
     models.Quiz.findAll().
     then(function(preguntas){
     if(req.session.preguntas === undefined){
@@ -205,7 +208,7 @@ exports.randomplay = function (req, res, next) {
 	     models.Quiz.findOne({where: {id : idpregunta}})
 	    .then(function (quiz) {
 		if (quiz) {
-		res.render('quizzes/randomplay', {quiz:quiz, score:app.locals.score});
+		res.render('quizzes/randomplay', {quiz:quiz, score:req.session.score});
 	
 		} else {
 		    throw new Error('No existe ningún quiz con id=');
@@ -216,8 +219,8 @@ exports.randomplay = function (req, res, next) {
 	    });
     } else {
 	delete req.session.preguntas;
-        var score_aux = app.locals.score;
-	app.locals.score = 0;
+        var score_aux = req.session.score;
+	req.session.score = 0;
 	res.render('quizzes/randomnomore', {score: score_aux});
     }
     });
@@ -226,14 +229,14 @@ exports.randomplay = function (req, res, next) {
 exports.randomcheck = function(req, res, next) {
 	var answer = req.query.answer || "";
         var result = answer.toLowerCase().trim() === req.quiz.answer.toLowerCase().trim();
-        app.locals.score = app.locals.score || 0;
+        //app.locals.score = app.locals.score || 0;
 	if(result){
-		 app.locals.score = app.locals.score + 1;
-		var score_aux = app.locals.score;
+		 req.session.score = req.session.score + 1;
+		var score_aux = req.session.score;
 	} else {
 		delete req.session.preguntas;
-		score_aux = app.locals.score;
-		app.locals.score = 0;
+		score_aux = req.session.score;
+		req.session.score = 0;
 	}
 	res.render('quizzes/randomresult', {score:score_aux, result: result, answer: answer});
 };
