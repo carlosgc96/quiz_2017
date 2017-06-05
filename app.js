@@ -8,11 +8,38 @@ var session = require('express-session');
 var partials = require('express-partials');
 var flash = require('express-flash');
 var methodOverride = require('method-override');
-
+var sequalize = require('sequelize');
 var index = require('./routes/index');
 
 var app = express();
+//BBDD
+var DATABASE_URL = "postgres://ipurrukilwtxxb:bda2214473db05668dd99d8787ff9e373206d164a2bf2ca0daf76927b7fdade6@ec2-107-21-99-176.compute-1.amazonaws.com:5432/dbbqjv39b6kv6c";
+var url, storage;
+if(!proccess.env.DATABASE_URL){
+	url = "sqlite:///";
+	storage = "quiz.sqlite";
+} else {
+	url = process.env.DATABASE_URL;
+	storage = process.env.DATABASE_STORAGE || "";
 
+}
+
+var sequelize = new Sequelize(url, {storage:storage});
+
+var Quiz = sequelize.import(path.join(__dirname, 'quiz');
+
+sequelize.sync();
+.then(function() {
+	console.log('BBDD creada con exito');
+})
+.catch(function(error){
+
+	console.log('error al crear BBDD' + error);
+process.exit(1);
+
+});
+
+exports.Quiz = Quiz;
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
