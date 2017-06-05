@@ -205,7 +205,7 @@ exports.randomplay = function (req, res, next) {
 	     models.Quiz.findOne({where: {id : idpregunta}})
 	    .then(function (quiz) {
 		if (quiz) {
-		res.render('quizzes/random_play', {quiz:quiz, score:app.locals.score});
+		res.render('quizzes/randomplay', {quiz:quiz, score:app.locals.score});
 	
 		} else {
 		    throw new Error('No existe ningún quiz con id=');
@@ -218,7 +218,7 @@ exports.randomplay = function (req, res, next) {
 	delete req.session.preguntas;
         var score_aux = app.locals.score;
 	app.locals.score = 0;
-	res.render('quizzes/random_nomore', {score: score_aux});
+	res.render('quizzes/randomnomore', {score: score_aux});
     }
     });
 };
@@ -226,7 +226,7 @@ exports.randomplay = function (req, res, next) {
 exports.randomcheck = function(req, res, next) {
 	var answer = req.query.answer || "";
         var result = answer.toLowerCase().trim() === req.quiz.answer.toLowerCase().trim();
-        //app.locals.score = app.locals.score || 0;
+        app.locals.score = app.locals.score || 0;
 	if(result){
 		 app.locals.score = app.locals.score + 1;
 		var score_aux = app.locals.score;
@@ -235,5 +235,5 @@ exports.randomcheck = function(req, res, next) {
 		score_aux = app.locals.score;
 		app.locals.score = 0;
 	}
-	res.render('quizzes/random_result', {score:score_aux, result: result, answer: answer});
+	res.render('quizzes/randomresult', {score:score_aux, result: result, answer: answer});
 };
