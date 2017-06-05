@@ -1,5 +1,7 @@
 var models = require("../models");
 var Sequelize = require('sequelize');
+var express = require('express');
+var app = express();
 
 var paginate = require('../helpers/paginate').paginate;
 
@@ -186,4 +188,52 @@ exports.check = function (req, res, next) {
         result: result,
         answer: answer
     });
+};
+
+exports.randomplay = function (req, res, next) {
+    app.locals.score = app.locals.score || 0; // Preguntar porque no me deja hacerlo con var = req.query.score, si lo hago asi se me resetea a 0
+    models.Quiz.findAll().
+    then(function(preguntas){
+    if(req.session.preguntas === undefined){
+    	req.session.preguntas = preguntas;
+    }
+    
+    if(req.session.preguntas.length >0){
+	 var rand = Math.floor(Math.random()*req.session.preguntas.length);
+   	 var idpregunta = req.session.preguntas[rand].id;
+    	req.session.preguntas.splice(rand, 1);
+	     models.Quiz.findOne({where: {id : idpregunta}})
+	    .then(function (quiz) {
+		if (quiz) {
+		res.render('quizzes/random_play', {quiz:quiz, score:app.locals.score});
+	
+		} else {
+		    throw new Error('No existe ningún quiz con id=');
+		}
+	    })
+	    .catch(function (error) {
+		next(error);
+	    });
+    } else {
+	delete req.session.preguntas;
+        var score_aux = app.locals.score;
+	app.locals.score = 0;
+	res.render('quizzes/random_nomore', {score: score_aux});
+    }
+    });
+};
+
+exports.randomcheck = function(req, res, next) {
+	var answer = req.query.answer || "";
+        var result = answer.toLowerCase().trim() === req.quiz.answer.toLowerCase().trim();
+        app.locals.score = app.locals.score || 0;
+	if(result){
+		 app.locals.score = app.locals.score + 1;
+		var score_aux = app.locals.score;
+	} else {
+		delete req.session.preguntas;
+		score_aux = app.locals.score;
+		app.locals.score = 0;
+	}
+	res.render('quizzes/random_result', {score:score_aux, result: result, answer: answer});
 };
