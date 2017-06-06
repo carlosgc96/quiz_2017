@@ -37,10 +37,21 @@ var User = sequelize.import(path.join(__dirname,'user'));
 // Relaciones entre modelos
 Tip.belongsTo(Quiz);
 Quiz.hasMany(Tip);
+//Relacion 1 a N entre User y Tips
+Tip.belongsTo(User, {foreignKey: 'AuthorId'}); 
+User.hasMany(Tip, {as: 'Author', foreignKey: 'AuthorId'});
 
 // Relacion 1 a N entre User y Quiz:
 User.hasMany(Quiz, {foreignKey: 'AuthorId'});
 Quiz.belongsTo(User, {as: 'Author', foreignKey: 'AuthorId'});
+
+sequelize.sync()
+.then(function(){
+	console.log("database creada");
+})
+.catch(function(){
+	console.log("error");
+})
 
 
 exports.Quiz = Quiz; // exportar definición de tabla Quiz
