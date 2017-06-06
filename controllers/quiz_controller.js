@@ -222,3 +222,54 @@ exports.check = function (req, res, next) {
         answer: answer
     });
 };
+exports.randomplay = function (req, res, next) {
+    //app.locals.score = app.locals.score || 0; // Preguntar porque no me deja hacerlo con var = req.query.score, si lo hago asi se me resetea a 0
+  if(req.session.score ===undefined){
+	req.session.score = 0;
+}
+    models.Quiz.findAll().
+    then(function(preguntas){
+    if(req.session.preguntas === undefined){
+    	req.session.preguntas = preguntas;
+    }
+    
+    if(req.session.preguntas.length >0){
+	 var rand = Math.floor(Math.random()*req.session.preguntas.length);
+   	 var idpregunta = req.session.preguntas[rand].id;
+    	req.session.preguntas.splice(rand, 1);
+	     models.Quiz.findOne({where: {id : idpregunta}})
+	    .then(function (quiz) {
+		if (quiz) {
+		res.render('quizzes/randomplay', {quiz:quiz, score:req.session.score});
+	
+		} else {
+		    throw new Error('No existe ningún quiz con id=');
+		}
+	    })
+	    .catch(function (error) {
+		next(error);
+	    });
+    } else {
+	delete req.session.preguntas;
+        var score_aux = req.session.score;
+	req.session.score = 0;
+	res.render('quizzes/randomnomore', {score: score_aux});
+    }
+    });
+};
+
+exports.randomcheck = function(req, res, next) {
+	var answer = req.query.answer || "";
+        var result = answer.toLowerCase().trim() === req.quiz.answer.toLowerCase().trim();
+        //app.locals.score = app.locals.score || 0;
+	if(result){
+		
+		 req.session.score = req.session.score + 1;
+		var score_aux = req.session.score;
+	} else {
+		delete req.session.preguntas;
+		score_aux = 0;
+		req.session.score = 0;
+	}
+	res.render('quizzes/randomresult', {score:score_aux, result: result, answer: answer});
+};
