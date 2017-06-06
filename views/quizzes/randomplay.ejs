@@ -18,4 +18,16 @@
         <input type="submit" class="itemNarrow" id="send" value="Comprobar">
     </div>
 </form>
+<h1>
+    Pistas:
+</h1>
 
+<% if (session.user) { %>
+    <% include ../tips/new %>
+<% } %>
+
+<% var tips = quiz.Tips; %>
+<% var quizId = quiz.id; %>
+<% var quizAuthorId = quiz.AuthorId; %>
+
+<% include ../tips/index %>

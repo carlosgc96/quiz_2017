@@ -8,7 +8,11 @@ exports.load = function (req, res, next, quizId) {
 
     models.Quiz.findById(quizId, {
         include: [
-            models.Tip,
+            {model: models.Tip,
+			 include: [
+					{model: models.User, as: 'Author'}
+					]
+	    },
             {model: models.User, as: 'Author'}
         ]
     })
@@ -31,7 +35,7 @@ exports.adminOrAuthorRequired = function(req, res, next){
 
     var isAdmin  = req.session.user.isAdmin;
     var isAuthor = req.quiz.AuthorId === req.session.user.id;
-
+    
     if (isAdmin || isAuthor) {
         next();
     } else {
@@ -40,7 +44,18 @@ exports.adminOrAuthorRequired = function(req, res, next){
     }
 };
 
+exports.adminOrAuthorRequiredByTip = function(req, res, next){
 
+    var isAdmin  = req.session.user.isAdmin;
+    var isAuthor = req.tip.AuthorId === req.session.user.id;
+    
+    if (isAdmin || isAuthor) {
+        next();
+    } else {
+        console.log('Operación prohibida: El usuario logeado no es el autor del quiz, ni un administrador.');
+        res.send(403);
+    }
+};
 // GET /quizzes
 exports.index = function (req, res, next) {
 
@@ -237,7 +252,14 @@ exports.randomplay = function (req, res, next) {
 	 var rand = Math.floor(Math.random()*req.session.preguntas.length);
    	 var idpregunta = req.session.preguntas[rand].id;
     	req.session.preguntas.splice(rand, 1);
-	     models.Quiz.findOne({where: {id : idpregunta}})
+	     models.Quiz.findOne(
+			{
+			where: {id : idpregunta},
+			include: [
+	                    {model: models.Tip, include: [{model: models.User, as : 'Author'}]},
+	                    {model: models.User, as: 'Author'}]
+
+	    })
 	    .then(function (quiz) {
 		if (quiz) {
 		res.render('quizzes/randomplay', {quiz:quiz, score:req.session.score});
